@@ -52,7 +52,7 @@ jobs:
           MIN=$(date -u +%M)
           TIME_NUM=$((10#$HOUR * 60 + 10#$MIN))
           EVENT="${{ github.event_name }}"
-          echo "UTC: ${HOUR}:${MIN} | Trigger: ${EVENT}"
+          echo "UTC time: ${HOUR}:${MIN} | Trigger: ${EVENT}"
           if [ "$EVENT" = "workflow_dispatch" ]; then
             echo "script=briefing_830.py" >> $GITHUB_OUTPUT
           elif [ $TIME_NUM -ge 178 ] && [ $TIME_NUM -le 190 ]; then
