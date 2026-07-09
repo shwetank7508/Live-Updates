@@ -1,37 +1,12 @@
-name: Market Updates — All Schedules
+name: Daily Market Briefing — 9:30 AM
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 3 * * 1-5'
-    - cron: '40 3 * * 1-5'
     - cron: '0 4 * * 1-5'
-    - cron: '15 4 * * 1-5'
-    - cron: '30 4 * * 1-5'
-    - cron: '45 4 * * 1-5'
-    - cron: '0 5 * * 1-5'
-    - cron: '15 5 * * 1-5'
-    - cron: '30 5 * * 1-5'
-    - cron: '45 5 * * 1-5'
-    - cron: '0 6 * * 1-5'
-    - cron: '15 6 * * 1-5'
-    - cron: '30 6 * * 1-5'
-    - cron: '45 6 * * 1-5'
-    - cron: '0 7 * * 1-5'
-    - cron: '15 7 * * 1-5'
-    - cron: '30 7 * * 1-5'
-    - cron: '45 7 * * 1-5'
-    - cron: '0 8 * * 1-5'
-    - cron: '15 8 * * 1-5'
-    - cron: '30 8 * * 1-5'
-    - cron: '45 8 * * 1-5'
-    - cron: '0 9 * * 1-5'
-    - cron: '15 9 * * 1-5'
-    - cron: '30 9 * * 1-5'
-    - cron: '45 9 * * 1-5'
 
 jobs:
-  market-update:
+  send-briefing:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,30 +20,8 @@ jobs:
       - name: Install libraries
         run: pip install yfinance feedparser requests pandas numpy
 
-      - name: Determine which script to run
-        id: script
-        run: |
-          HOUR=$(date -u +%H)
-          MIN=$(date -u +%M)
-          TIME_NUM=$((10#$HOUR * 60 + 10#$MIN))
-          EVENT="${{ github.event_name }}"
-          echo "UTC time: ${HOUR}:${MIN} | Trigger: ${EVENT}"
-          if [ "$EVENT" = "workflow_dispatch" ]; then
-            echo "script=briefing_830.py" >> $GITHUB_OUTPUT
-          elif [ $TIME_NUM -ge 178 ] && [ $TIME_NUM -le 190 ]; then
-            echo "script=briefing_830.py" >> $GITHUB_OUTPUT
-          elif [ $TIME_NUM -ge 218 ] && [ $TIME_NUM -le 230 ]; then
-            echo "script=briefing_910.py" >> $GITHUB_OUTPUT
-          elif [ $TIME_NUM -ge 238 ] && [ $TIME_NUM -le 252 ]; then
-            echo "script=briefing_930.py" >> $GITHUB_OUTPUT
-          elif [ $TIME_NUM -ge 255 ] && [ $TIME_NUM -le 600 ]; then
-            echo "script=update_15min.py" >> $GITHUB_OUTPUT
-          else
-            echo "script=briefing_830.py" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run market script
+      - name: Send morning briefing
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: python ${{ steps.script.outputs.script }}
+        run: python master_briefing.py
